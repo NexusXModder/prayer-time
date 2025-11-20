@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Prayer Times Dashboard | Premium Edition</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 1. CUSTOM FONT INTEGRATION */
+        @font-face {
+            font-family: 'CustomFont';
+            src: url('font1.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; /* Ensures smooth loading */
+        }
+
+        /* Custom Tailwind Configuration - Defining the Deep Blue/Emerald Theme */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#192D46', /* Deep Sapphire Blue/Almost Black */
+                        'accent-emerald': '#00C853', /* Striking Emerald Green */
+                        'accent-red': '#f44336',
+                        'soft-bg': '#F0F4F8', /* Light grey background */
+                        'card-bg': '#ffffff',
+                    },
+                    fontFamily: {
+                        /* 2. APPLYING THE CUSTOM FONT GLOBALLY */
+                        sans: ['CustomFont', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 50px rgba(25, 45, 70, 0.15)',
+                        'floating': '0 10px 25px rgba(25, 45, 70, 0.25)',
+                    }
+                }
+            }
+        }
+
+        /* Custom Styles for the premium, native mobile look */
+
+        /* Header Gradient and Shape (Deep Blue) */
+        .header-bg {
+            background: linear-gradient(135deg, #192D46 0%, #30475E 100%);
+            clip-path: ellipse(150% 100% at 50% 0%);
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+        }
+
+        /* Timeline Styling */
+        .timeline {
+            border-left: 3px solid #E0E0E0;
+            padding-left: 20px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 25px;
+            padding-top: 5px;
+        }
+        
+        /* The dot (indicator) */
+        .timeline-dot {
+            position: absolute;
+            left: -9px;
+            top: 10px; 
+            height: 15px;
+            width: 15px;
+            background-color: #ffffff;
+            border: 3px solid #CFD8DC; /* Light contrast border */
+            border-radius: 9999px;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        /* Active dot for the current/next prayer (Emerald Accent) */
+        .timeline-item.active .timeline-dot {
+            background-color: #00C853;
+            border-color: #192D46;
+            transform: scale(1.3);
+        }
+        
+        .timeline-item.active .prayer-time {
+            color: #192D46; /* Make active time dark for high contrast */
+        }
+        
+        /* Active background for the row */
+        .timeline-item.active {
+            background-color: #F8F8F8;
+            border-radius: 8px;
+            margin: 0 -10px;
+            padding-left: 30px;
+            padding-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Bell icon color transition */
+        .bell-btn {
+            transition: color 0.2s ease, transform 0.1s ease;
+        }
+        .bell-btn:hover {
+            color: #00C853;
+            transform: scale(1.05);
+        }
+        .bell-btn.active {
+            color: #00C853;
+        }
+    </style>
+</head>
+<body class="font-sans bg-soft-bg min-h-screen">
+
+    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-soft-bg shadow-2xl overflow-hidden">
+        
+        <!-- === 1. TOP HEADER SECTION (Deep Blue Premium Theme) === -->
+        <header class="header-bg text-white pt-6 pb-20 px-6 shadow-xl">
+            <div class="flex justify-between items-start mb-6">
+                <!-- Current Date -->
+                <div class="text-base font-medium opacity-90" id="current-gregorian-date">Fri 21 November 2025</div>
+                
+                <!-- Quran Icon & Settings -->
+                <div class="flex items-center space-x-3">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6"/><path d="M9 11h6"/></svg>
+                    <svg class="w-6 h-6 hover:text-accent-emerald transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Date Navigation Section (Functional) -->
+            <div class="flex items-center justify-between mt-4 space-x-4">
+                <button onclick="changeDate(-1)" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="text-center flex-grow">
+                    <p class="text-3xl font-extrabold" id="hijri-display">30, Jumādā al-.. </p>
+                    <p class="text-sm font-light opacity-80" id="gregorian-nav-display">Fri 21 November 2025</p>
+                </div>
+                <button onclick="changeDate(1)" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button onclick="resetDate()" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105" title="Go to Today">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- === 2. LOCATION ALERT BANNER (Floating Card) === -->
+        <div id="location-banner" class="relative -top-10 mx-4 p-4 bg-primary-dark text-white rounded-xl shadow-floating flex items-center justify-between transform transition duration-500 hover:shadow-2xl z-20">
+            <div class="flex items-center">
+                <!-- Location icon -->
+                <svg class="w-5 h-5 mr-2 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="font-semibold text-sm">Location Required for Global Accuracy</span>
+            </div>
+            <button onclick="requestLocation()" class="text-sm font-extrabold text-accent-emerald underline hover:no-underline transition">Enable GPS</button>
+        </div>
+        
+        <!-- Custom Modal for Alerts (replacing alert()) -->
+        <div id="custom-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
+                <h3 id="modal-title" class="text-xl font-bold mb-3 text-primary-dark">Alert</h3>
+                <p id="modal-message" class="text-gray-700 mb-4"></p>
+                <button onclick="closeModal()" class="w-full bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-accent-emerald transition">OK</button>
+            </div>
+        </div>
+
+        <!-- === 3. PRAYER TIMES CARD (The Core Dashboard) === -->
+        <main class="relative -top-6 mx-4 p-6 bg-card-bg rounded-xl shadow-premium z-10 min-h-[300px]">
+            <!-- Dynamic Content Area -->
+            <div id="prayer-content-area">
+                <p id="loading-state" class="text-center text-gray-500 font-medium py-12">
+                    <svg class="animate-spin h-8 w-8 text-primary-dark mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Awaiting GPS signal for accurate times...
+                </p>
+                
+                <!-- Prayer Times List -->
+                <div id="prayer-list" class="timeline hidden">
+                    <!-- Dynamic prayer items will go here -->
+                </div>
+
+                <div id="location-display" class="text-center text-xs text-gray-400 mt-6 pt-4 border-t border-gray-100">
+                    <!-- Location details will be shown here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let locationData = null;
+        let originalDate = new Date(); // To reset to today
+
+        // Simulated data for demonstration. In a real application, this would be updated via an API.
+        const PRAYER_TIMES = [
+            { name: "Fajr", time: "05:15", isPrayer: true },
+            { name: "Sunrise", time: "06:40", isPrayer: false },
+            { name: "Dhuhr", time: "12:35", isPrayer: true },
+            { name: "Asr", time: "16:05", isPrayer: true },
+            { name: "Maghrib", time: "17:50", isPrayer: true },
+            { name: "Isha", time: "19:05", isPrayer: true }
+        ];
+
+        // --- UI/MODAL FUNCTIONS ---
+
+        /**
+         * Shows a custom modal (replaces alert()).
+         * @param {string} title - Modal title.
+         * @param {string} message - Modal body message.
+         * @param {string} type - 'success' or 'error'.
+         */
+        function showModal(title, message, type = 'alert') {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+
+            const titleEl = document.getElementById('modal-title');
+            titleEl.classList.remove('text-primary-dark', 'text-accent-red');
+            titleEl.classList.add(type === 'success' ? 'text-accent-emerald' : 'text-accent-red');
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').style.display = 'none';
+        }
+
+        // --- DATE & NAVIGATION FUNCTIONS ---
+
+        /**
+         * Formats a date object into a readable string.
+         * @param {Date} date - The date object.
+         * @returns {string} Formatted date string.
+         */
+        function formatGregorianDate(date) {
+            const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        /**
+         * Simulates a Hijri date based on the Gregorian date.
+         * Note: Full Hijri conversion requires a complex library. This is for UI realism.
+         * @param {Date} date - The date object.
+         * @returns {string} Simulated Hijri display string.
+         */
+        function formatHijriDate(date) {
+            const day = date.getDate();
+            const hijriMonthNames = ["Muḥarram", "Ṣafar", "Rabīʿ al-Awwal", "Rabīʿ ath-Thānī", "Jumādā al-Ūlā", "Jumādā al-Ākhirah", "Rajab", "Shaʿbān", "Ramaḍān", "Shawwāl", "Dhū al-Qaʿdah", "Dhū al-Ḥijjah"];
+            const monthIndex = date.getMonth() % hijriMonthNames.length;
+            
+            return `${day}, ${hijriMonthNames[monthIndex].substring(0, 10)}..`;
+        }
+
+        /**
+         * Changes the displayed date and updates the UI.
+         * @param {number} days - Number of days to add/subtract.
+         */
+        function changeDate(days) {
+            currentDate.setDate(currentDate.getDate() + days);
+            updateUI();
+            
+            // Re-fetch/re-calculate times if location is known
+            if (locationData) {
+                // This is where you would call your API to get times for the new date
+                renderPrayerTimes(locationData, "Times updated for selected date.");
+            }
+        }
+        
+        /**
+         * Resets the displayed date to today.
+         */
+        function resetDate() {
+            currentDate = new Date();
+            updateUI();
+            if (locationData) {
+                renderPrayerTimes(locationData, "Times reset to current date.");
+            }
+        }
+
+
+        // --- LOCATION & DATA FETCHING FUNCTIONS ---
+
+        /**
+         * Requests location permission from the user.
+         */
+        function requestLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('loading-state').innerHTML = `<svg class="animate-spin h-8 w-8 text-primary-dark mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Fetching precise coordinates...`;
+                document.getElementById('location-banner').classList.add('opacity-50', 'pointer-events-none');
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Store location data globally
+                        locationData = { lat, lon };
+
+                        // Hide the banner on success
+                        document.getElementById('location-banner').style.display = 'none';
+
+                        // Show Success Message
+                        showModal('Success', `GPS coordinates acquired! Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}. Displaying accurate worldwide prayer times.`, 'success');
+
+                        // Proceed to render times
+                        renderPrayerTimes(locationData, `Times calculated for GPS Location (${lat.toFixed(2)}, ${lon.toFixed(2)})`);
+                    },
+                    (error) => {
+                        document.getElementById('location-banner').classList.remove('opacity-50', 'pointer-events-none');
+                        document.getElementById('loading-state').innerHTML = `<svg class="h-8 w-8 text-accent-red mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Location access failed. Please try again.`;
+
+                        let errorMessage = 'Location access failed. Please ensure permissions are granted.';
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMessage = 'Location permission denied by user. Please enable location services in your browser settings.';
+                        }
+                        showModal('GPS Error', errorMessage, 'error');
+                    },
+                    { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+                );
+            } else {
+                showModal("Browser Error", "Geolocation is not supported by your browser. Accurate location service is unavailable.", 'error');
+            }
+        }
+
+        /**
+         * Renders the prayer times list after a successful location fetch.
+         * @param {Object} data - Location data (lat, lon).
+         * @param {string} locationMsg - Message to display at the bottom.
+         */
+        function renderPrayerTimes(data, locationMsg) {
+            const listContainer = document.getElementById('prayer-list');
+            listContainer.classList.remove('hidden');
+            document.getElementById('loading-state').style.display = 'none';
+
+            let html = '';
+            
+            // In a real app, this simulation would be replaced by actual data from a time calculation API.
+            const nextPrayerIndex = 2; // Simulating Dhuhr as the next prayer for demonstration
+
+            PRAYER_TIMES.forEach((item, index) => {
+                const isActive = index === nextPrayerIndex && locationData;
+                const activeClasses = isActive ? 'active' : '';
+                
+                html += `
+                    <div class="timeline-item flex justify-between items-center py-2 ${activeClasses}">
+                        <div class="timeline-dot"></div>
+                        <div class="flex-grow">
+                            <p class="text-lg font-semibold text-gray-800">${item.name} ${isActive ? '<span class="text-xs text-accent-emerald font-bold ml-1">(Next)</span>' : ''}</p>
+                            <p class="text-3xl font-extrabold prayer-time text-gray-700">${item.time}</p>
+                        </div>
+                        ${item.isPrayer ? `
+                            <button class="bell-btn p-2 text-gray-400 hover:text-accent-emerald transition ${isActive ? 'active' : ''}" aria-label="Set notification for ${item.name}">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                            </button>
+                        ` : '<span class="w-7 h-7 block"></span>'}
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+            document.getElementById('location-display').innerHTML = `
+                <p class="font-bold text-primary-dark">${locationMsg}</p>
+                <p>Calculation Method: High-Latitude Adjustment (Simulated)</p>
+                <p>Date: ${formatGregorianDate(currentDate)}</p>
+            `;
+        }
+        
+        // --- INITIALIZATION ---
+
+        function updateUI() {
+            const gregorianNav = formatGregorianDate(currentDate);
+            document.getElementById('current-gregorian-date').textContent = gregorianNav;
+            document.getElementById('gregorian-nav-display').textContent = gregorianNav;
+            document.getElementById('hijri-display').textContent = formatHijriDate(currentDate);
+        }
+
+        window.onload = function() {
+            updateUI();
+            console.log("Dashboard initialized. Click 'Enable GPS' to activate the location service.");
+        }
+
+    </script>
+</body>
+</html>
+
