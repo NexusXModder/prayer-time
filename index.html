@@ -1,393 +1,754 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Prayer Times Dashboard | Premium Edition</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* 1. CUSTOM FONT INTEGRATION */
-        @font-face {
-            font-family: 'CustomFont';
-            src: url('font1.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap; /* Ensures smooth loading */
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prayer Times — Pro UI</title>
+  <meta name="description" content="Accurate prayer times with polished UI, location, calendar export, and notification controls." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ---------------- Design system ---------------- */
+    :root{
+      --bg1: #f7fdf8;
+      --bg2: #ffffff;
+      --green-600:#15a56b;
+      --green-700:#0e8b56;
+      --muted:#9aa3a0;
+      --card:#ffffff;
+      --glass: rgba(255,255,255,0.85);
+      --shadow-lg: 0 12px 30px rgba(15,40,35,0.12);
+      --radius:18px;
+      --accent:#f59e0b;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color-scheme: light;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 60%);
+      padding:22px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+    .container{
+      width:100%;
+      max-width:420px;
+    }
 
-        /* Custom Tailwind Configuration - Defining the Deep Blue/Emerald Theme */
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-dark': '#192D46', /* Deep Sapphire Blue/Almost Black */
-                        'accent-emerald': '#00C853', /* Striking Emerald Green */
-                        'accent-red': '#f44336',
-                        'soft-bg': '#F0F4F8', /* Light grey background */
-                        'card-bg': '#ffffff',
-                    },
-                    fontFamily: {
-                        /* 2. APPLYING THE CUSTOM FONT GLOBALLY */
-                        sans: ['CustomFont', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        'premium': '0 20px 50px rgba(25, 45, 70, 0.15)',
-                        'floating': '0 10px 25px rgba(25, 45, 70, 0.25)',
-                    }
-                }
-            }
-        }
+    /* ---------- Header ---------- */
+    .header{
+      background: linear-gradient(90deg,var(--green-700),var(--green-600));
+      color:white;
+      padding:18px;
+      border-radius:14px;
+      box-shadow:var(--shadow-lg);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .header-left{flex:1}
+    .date-main{font-weight:700;font-size:16px;letter-spacing:0.2px}
+    .date-sub{opacity:0.95;font-size:13px;margin-top:6px}
+    .quran{
+      width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;
+    }
 
-        /* Custom Styles for the premium, native mobile look */
+    /* location bar */
+    .location-bar{
+      margin-top:12px;
+      background: linear-gradient(90deg,#fff8f8,#fff);
+      border-radius:12px;
+      padding:10px 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 6px 16px rgba(15,40,35,0.04);
+    }
+    .loc-left{display:flex;gap:8px;align-items:center}
+    .btn{
+      appearance:none;border:0;padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer;
+      display:inline-flex;gap:8px;align-items:center;justify-content:center;
+    }
+    .btn.primary{background:var(--green-600);color:white}
+    .btn.ghost{background:transparent;color:var(--green-600);border:1px solid rgba(255,255,255,0.06)}
 
-        /* Header Gradient and Shape (Deep Blue) */
-        .header-bg {
-            background: linear-gradient(135deg, #192D46 0%, #30475E 100%);
-            clip-path: ellipse(150% 100% at 50% 0%);
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-        }
+    /* ---------- Card ---------- */
+    .card{
+      margin-top:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98));
+      border-radius:var(--radius);
+      padding:12px;
+      box-shadow:var(--shadow-lg);
+      position:relative;
+      overflow:visible;
+    }
+    .card-head{
+      display:flex;justify-content:space-between;align-items:center;padding:10px 6px;border-radius:10px;
+      background: linear-gradient(90deg,var(--green-700),var(--green-600));
+      color:white;margin-bottom:14px;
+    }
+    .card-head .title{font-weight:800;font-size:16px}
+    .card-head small{opacity:0.95;font-weight:600}
 
-        /* Timeline Styling */
-        .timeline {
-            border-left: 3px solid #E0E0E0;
-            padding-left: 20px;
-        }
+    /* timeline + list */
+    .prayer-area{display:flex;gap:12px;padding:6px}
+    .timeline{
+      width:56px;display:flex;flex-direction:column;align-items:center;padding-top:6px;position:relative;
+    }
+    .timeline::before{
+      content:"";position:absolute;left:26px;top:22px;bottom:22px;width:6px;border-radius:6px;background:linear-gradient(#e9f6ee,#fff);
+    }
+    .timeline .dot{width:14px;height:14px;border-radius:50%;background:var(--green-600);margin:10px 0;box-shadow:0 6px 18px rgba(14,139,86,0.14)}
 
-        .timeline-item {
-            position: relative;
-            padding-bottom: 25px;
-            padding-top: 5px;
-        }
-        
-        /* The dot (indicator) */
-        .timeline-dot {
-            position: absolute;
-            left: -9px;
-            top: 10px; 
-            height: 15px;
-            width: 15px;
-            background-color: #ffffff;
-            border: 3px solid #CFD8DC; /* Light contrast border */
-            border-radius: 9999px;
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        
-        /* Active dot for the current/next prayer (Emerald Accent) */
-        .timeline-item.active .timeline-dot {
-            background-color: #00C853;
-            border-color: #192D46;
-            transform: scale(1.3);
-        }
-        
-        .timeline-item.active .prayer-time {
-            color: #192D46; /* Make active time dark for high contrast */
-        }
-        
-        /* Active background for the row */
-        .timeline-item.active {
-            background-color: #F8F8F8;
-            border-radius: 8px;
-            margin: 0 -10px;
-            padding-left: 30px;
-            padding-right: 10px;
-            transition: background-color 0.3s ease;
-        }
+    .list{flex:1;display:flex;flex-direction:column;gap:6px}
+    .row{
+      display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;min-height:58px;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.92));
+    }
+    .row:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(15,40,35,.06)}
+    .row .left{display:flex;flex-direction:column}
+    .pray-name{font-weight:700;font-size:18px}
+    .pray-time{font-weight:600;color:var(--muted);margin-top:6px}
+    .actions{display:flex;gap:10px;align-items:center}
+    .bell{width:40px;height:40px;border-radius:10px;border:0;background:transparent;cursor:pointer;color:var(--muted)}
+    .bell.active{color:var(--green-700);transform:scale(1.03)}
+    .small-note{font-size:12px;color:#9aa3a0;margin-top:8px}
 
-        /* Bell icon color transition */
-        .bell-btn {
-            transition: color 0.2s ease, transform 0.1s ease;
-        }
-        .bell-btn:hover {
-            color: #00C853;
-            transform: scale(1.05);
-        }
-        .bell-btn.active {
-            color: #00C853;
-        }
-    </style>
+    /* watermark */
+    .watermark{
+      position:absolute;left:0;right:0;top:120px;bottom:0;opacity:0.06;pointer-events:none;background-image:
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><g fill="%23000"><rect x="0" y="0" width="640" height="480" fill="none"/><path d="M320 40c-48 0-84 36-84 84v108H84v132h472V232H404V124c0-48-36-84-84-84z"/></g></svg>');
+      background-position:center;background-repeat:no-repeat;background-size:contain;border-radius:12px;
+    }
+
+    /* footer + controls */
+    .controls{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px}
+    .fab{
+      position:fixed;right:28px;bottom:28px;background:var(--green-700);color:white;width:56px;height:56px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;box-shadow: 0 16px 40px rgba(14,139,86,0.16);border:0;font-size:20px;cursor:pointer;
+    }
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(6,12,8,0.36);display:none;align-items:center;justify-content:center;padding:18px}
+    .modal{width:100%;max-width:520px;border-radius:12px;background:var(--card);padding:18px;box-shadow:var(--shadow-lg)}
+    .modal .row{background:transparent;box-shadow:none;padding:6px 0}
+    .field{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .input{padding:10px 12px;border-radius:10px;border:1px solid #e7e7e7;font-weight:600}
+
+    /* small screens */
+    @media (max-width:420px){
+      .header{padding:14px}
+      .date-main{font-size:15px}
+      .card{padding:10px}
+      .timeline{width:44px}
+    }
+
+    /* accessibility */
+    button:focus,.btn:focus{outline:3px solid rgba(14,139,86,0.14);outline-offset:3px}
+  </style>
 </head>
-<body class="font-sans bg-soft-bg min-h-screen">
-
-    <div id="app-container" class="max-w-md mx-auto min-h-screen bg-soft-bg shadow-2xl overflow-hidden">
-        
-        <!-- === 1. TOP HEADER SECTION (Deep Blue Premium Theme) === -->
-        <header class="header-bg text-white pt-6 pb-20 px-6 shadow-xl">
-            <div class="flex justify-between items-start mb-6">
-                <!-- Current Date -->
-                <div class="text-base font-medium opacity-90" id="current-gregorian-date">Fri 21 November 2025</div>
-                
-                <!-- Quran Icon & Settings -->
-                <div class="flex items-center space-x-3">
-                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6"/><path d="M9 11h6"/></svg>
-                    <svg class="w-6 h-6 hover:text-accent-emerald transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                    </svg>
-                </div>
-            </div>
-            
-            <!-- Date Navigation Section (Functional) -->
-            <div class="flex items-center justify-between mt-4 space-x-4">
-                <button onclick="changeDate(-1)" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <div class="text-center flex-grow">
-                    <p class="text-3xl font-extrabold" id="hijri-display">30, Jumādā al-.. </p>
-                    <p class="text-sm font-light opacity-80" id="gregorian-nav-display">Fri 21 November 2025</p>
-                </div>
-                <button onclick="changeDate(1)" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-                <button onclick="resetDate()" class="text-white p-2 rounded-full hover:bg-white/20 transition duration-150 transform hover:scale-105" title="Go to Today">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </button>
-            </div>
-        </header>
-
-        <!-- === 2. LOCATION ALERT BANNER (Floating Card) === -->
-        <div id="location-banner" class="relative -top-10 mx-4 p-4 bg-primary-dark text-white rounded-xl shadow-floating flex items-center justify-between transform transition duration-500 hover:shadow-2xl z-20">
-            <div class="flex items-center">
-                <!-- Location icon -->
-                <svg class="w-5 h-5 mr-2 text-accent-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span class="font-semibold text-sm">Location Required for Global Accuracy</span>
-            </div>
-            <button onclick="requestLocation()" class="text-sm font-extrabold text-accent-emerald underline hover:no-underline transition">Enable GPS</button>
-        </div>
-        
-        <!-- Custom Modal for Alerts (replacing alert()) -->
-        <div id="custom-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300">
-            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
-                <h3 id="modal-title" class="text-xl font-bold mb-3 text-primary-dark">Alert</h3>
-                <p id="modal-message" class="text-gray-700 mb-4"></p>
-                <button onclick="closeModal()" class="w-full bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-accent-emerald transition">OK</button>
-            </div>
-        </div>
-
-        <!-- === 3. PRAYER TIMES CARD (The Core Dashboard) === -->
-        <main class="relative -top-6 mx-4 p-6 bg-card-bg rounded-xl shadow-premium z-10 min-h-[300px]">
-            <!-- Dynamic Content Area -->
-            <div id="prayer-content-area">
-                <p id="loading-state" class="text-center text-gray-500 font-medium py-12">
-                    <svg class="animate-spin h-8 w-8 text-primary-dark mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Awaiting GPS signal for accurate times...
-                </p>
-                
-                <!-- Prayer Times List -->
-                <div id="prayer-list" class="timeline hidden">
-                    <!-- Dynamic prayer items will go here -->
-                </div>
-
-                <div id="location-display" class="text-center text-xs text-gray-400 mt-6 pt-4 border-t border-gray-100">
-                    <!-- Location details will be shown here -->
-                </div>
-            </div>
-        </main>
+<body>
+  <div class="container" id="app" aria-live="polite">
+    <!-- Header -->
+    <div class="header" role="banner">
+      <div class="header-left">
+        <div class="date-main" id="displayDate">Fri 21 November 2025</div>
+        <div class="date-sub" id="displayHijri">30 Jumādā al-.. — Fri 21 Nov 2025</div>
+      </div>
+      <div class="quran" aria-hidden="true">
+        <svg width="46" height="46" viewBox="0 0 24 24" fill="none"><path d="M3 5c0-1 1-2 2-2h6l3 2 3-2h1c1 0 2 .9 2 2v14c0 1-1 2-2 2h-1l-3-2-3 2H5c-1 0-2-.9-2-2V5z" fill="white"/></svg>
+      </div>
     </div>
 
-    <script>
-        let currentDate = new Date();
-        let locationData = null;
-        let originalDate = new Date(); // To reset to today
+    <div class="location-bar" role="region" aria-label="Location controls">
+      <div class="loc-left">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;margin-right:6px"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" fill="#c44747"/></svg>
+        <div>
+          <div style="font-weight:700">Accurate prayer times</div>
+          <div style="font-size:13px;color:#6b6b6b" id="locLabel">Location: unknown • Using approximate times</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn primary" id="btnLocate">Enable location</button>
+        <button class="btn" id="btnSearch">Search</button>
+        <button class="btn" id="btnSettings" title="Settings">⚙️</button>
+      </div>
+    </div>
 
-        // Simulated data for demonstration. In a real application, this would be updated via an API.
-        const PRAYER_TIMES = [
-            { name: "Fajr", time: "05:15", isPrayer: true },
-            { name: "Sunrise", time: "06:40", isPrayer: false },
-            { name: "Dhuhr", time: "12:35", isPrayer: true },
-            { name: "Asr", time: "16:05", isPrayer: true },
-            { name: "Maghrib", time: "17:50", isPrayer: true },
-            { name: "Isha", time: "19:05", isPrayer: true }
-        ];
+    <!-- Main card -->
+    <section class="card" role="main" aria-labelledby="prayerTitle">
+      <div class="card-head">
+        <div>
+          <div class="title" id="monthTitle">30 Jumādā al-..</div>
+          <small id="subDate">Fri 21 November 2025</small>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn" id="prevDay" aria-label="Previous day">‹</button>
+          <button class="btn" id="nextDay" aria-label="Next day">›</button>
+          <button class="btn" id="fetchAlAdhan" title="Fetch high accuracy (AlAdhan)">AlAdhan</button>
+        </div>
+      </div>
 
-        // --- UI/MODAL FUNCTIONS ---
+      <div class="prayer-area" role="list" aria-label="Prayer times">
+        <div class="timeline" aria-hidden="true">
+          <div style="height:6px"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div style="flex:1"></div>
+        </div>
 
-        /**
-         * Shows a custom modal (replaces alert()).
-         * @param {string} title - Modal title.
-         * @param {string} message - Modal body message.
-         * @param {string} type - 'success' or 'error'.
-         */
-        function showModal(title, message, type = 'alert') {
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
+        <div class="list" id="prayersContainer">
+          <!-- rows inserted by JS -->
+        </div>
+      </div>
 
-            const titleEl = document.getElementById('modal-title');
-            titleEl.classList.remove('text-primary-dark', 'text-accent-red');
-            titleEl.classList.add(type === 'success' ? 'text-accent-emerald' : 'text-accent-red');
-            
-            modal.style.display = 'flex';
+      <div class="small-note" style="margin-top:10px" id="infoNote">Times are calculated client-side. Use AlAdhan for higher accuracy or change method in Settings.</div>
+
+      <div class="controls">
+        <button class="btn" id="btnExport">Export ICS</button>
+      </div>
+
+      <div class="watermark" aria-hidden="true"></div>
+    </section>
+
+    <footer style="text-align:center;color:#6b6b6b;margin-top:14px;font-size:13px">
+      Built with care • Save as <code>index.html</code> and deploy
+    </footer>
+  </div>
+
+  <!-- Floating settings button -->
+  <button class="fab" id="openSettings" aria-label="Open settings">⚙️</button>
+
+  <!-- Modal (hidden) -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h3 id="modalTitle" style="margin:0">Settings & Location</h3>
+
+      <div class="field">
+        <label style="font-weight:700">Calculation source</label>
+        <select id="calcSource" class="input" aria-label="Calculation source">
+          <option value="calc">Local calculation (fast)</option>
+          <option value="aladhan">AlAdhan API (recommended)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label style="font-weight:700">Asr method</label>
+        <select id="asrMethod" class="input">
+          <option value="1">Standard (Shafi'i) — factor 1</option>
+          <option value="2">Hanafi — factor 2</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label style="font-weight:700">Manual timezone offset (hours)</label>
+        <input id="tzInput" class="input" placeholder="leave empty for device timezone" />
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button class="btn" id="closeModal">Close</button>
+        <button class="btn primary" id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /*************************************************************************
+   * Utilities & small prayer calculator (improved readability & features)
+   * - Includes optional AlAdhan fetch
+   * - ICS export generation
+   * - Local notification scheduling while the page is open
+   *************************************************************************/
+
+  (function(){
+    /* ---------- Helpers ---------- */
+    const $ = (selector, el=document) => el.querySelector(selector);
+    const $$ = (selector, el=document) => Array.from(el.querySelectorAll(selector));
+
+    function dtr(d){ return d * Math.PI / 180; }
+    function rtd(r){ return r * 180 / Math.PI; }
+    function pad2(n){ return String(n).padStart(2,'0'); }
+
+    function isoDateLocal(d){
+      // return YYYY-MM-DD
+      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    }
+
+    function formatTimeFromDecimal(h){
+      if(isNaN(h)) return '--:--';
+      h = (h + 24) % 24;
+      const H = Math.floor(h);
+      const M = Math.floor((h - H) * 60 + 0.5);
+      return `${pad2(H)}:${pad2(M)}`;
+    }
+
+    // Simple client-side Hijri (arithmetical) + small formatter
+    function gregToHijri(gDate){
+      const day = gDate.getDate(), month = gDate.getMonth()+1, year = gDate.getFullYear();
+      const jd = Math.floor((1461*(year+4800 + Math.floor((month-14)/12)))/4)
+               + Math.floor((367*(month-2-12*(Math.floor((month-14)/12))))/12)
+               - Math.floor((3*(Math.floor((year+4900 + Math.floor((month-14)/12))/100)))/4)
+               + day - 32075;
+      let l = jd - 1948440 + 10632;
+      const n = Math.floor((l - 1) / 10631);
+      l = l - 10631 * n + 354;
+      const j = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719)) + (Math.floor(l / 5670)) * (Math.floor((43 * l) / 15238));
+      l = l - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+      const m = Math.floor((24 * l) / 709);
+      const d = l - Math.floor((709 * m) / 24);
+      const y = 30 * n + j - 30;
+      return {y, m, d};
+    }
+
+    /* ---------- Solar math (compact, approximate) ---------- */
+    function julianDate(y,m,d){
+      if(m<=2){ y--; m+=12; }
+      const A = Math.floor(y/100);
+      const B = 2 - A + Math.floor(A/4);
+      return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + d + B - 1524.5;
+    }
+    function sunPos(jd){
+      const D = jd - 2451545.0;
+      const g = 357.529 + 0.98560028 * D;
+      const q = 280.459 + 0.98564736 * D;
+      const L = q + 1.915 * Math.sin(dtr(g)) + 0.020 * Math.sin(dtr(2*g));
+      const e = 23.439 - 0.00000036 * D;
+      const RA = rtd(Math.atan2(Math.cos(dtr(e)) * Math.sin(dtr(L)), Math.cos(dtr(L)))) / 15;
+      const decl = rtd(Math.asin(Math.sin(dtr(e)) * Math.sin(dtr(L))));
+      const eqt = q/15 - RA;
+      return {decl, eqt};
+    }
+    function solarNoon(jd, lon){
+      const eqt = sunPos(jd).eqt;
+      return 12 - eqt - lon/15;
+    }
+    function computeHourAngle(angle, decl, lat){
+      const cosH = (Math.cos(dtr(angle)) - Math.sin(dtr(lat)) * Math.sin(dtr(decl))) / (Math.cos(dtr(lat)) * Math.cos(dtr(decl)));
+      if(cosH < -1 || cosH > 1) return NaN;
+      return rtd(Math.acos(cosH));
+    }
+
+    /* ---------- Prayer calculation wrapper ---------- */
+    const PrayerCalc = {
+      getTimesLocal: function(date, coords, opts){
+        // coords: {lat, lon, timezone}
+        // opts: {fajrAngle, ishaAngle, asrMethod}
+        opts = Object.assign({fajrAngle:18, ishaAngle:18, asrMethod:1}, opts || {});
+        const lat = coords.lat, lon = coords.lon, tz = coords.timezone;
+        const parts = { y: date.getFullYear(), m: date.getMonth()+1, d: date.getDate() };
+        const jd = julianDate(parts.y, parts.m, parts.d);
+        const noon = solarNoon(jd, lon);
+        const sun = sunPos(jd);
+        const times = {};
+        // Dhuhr
+        times.Dhuhr = formatTimeFromDecimal(noon + tz);
+        // Sunrise / Maghrib (sun altitude ~ -0.833)
+        const haSunrise = computeHourAngle(90.833, sun.decl, lat);
+        times.Sunrise = formatTimeFromDecimal((noon - haSunrise/15) + tz);
+        times.Maghrib = formatTimeFromDecimal((noon + haSunrise/15) + tz);
+        // Fajr / Isha using twilight angles
+        const haFajr = computeHourAngle(180 - opts.fajrAngle, sun.decl, lat);
+        const haIsha = computeHourAngle(180 - opts.ishaAngle, sun.decl, lat);
+        times.Fajr = formatTimeFromDecimal((noon - haFajr/15) + tz);
+        times.Isha = formatTimeFromDecimal((noon + haIsha/15) + tz);
+        // Asr (approx): angle: atan(1 + factor)
+        const factor = opts.asrMethod === 2 ? 2 : 1;
+        const angleAsr = rtd(Math.atan(1 + factor));
+        const haAsr = computeHourAngle(90 + angleAsr, sun.decl, lat);
+        times.Asr = formatTimeFromDecimal((noon + haAsr/15) + tz);
+        return times;
+      },
+      getTimesAlAdhan: async function(date, coords, opts){
+        // Calls AlAdhan API for full-featured times. No API key needed for public endpoints.
+        // Returns times or throws error.
+        try{
+          const method = opts.method || 2; // default method param
+          const timestamp = Math.floor(date.getTime()/1000);
+          // Using 'timings' endpoint by timestamp
+          const url = `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${coords.lat}&longitude=${coords.lon}&method=${method}&school=${opts.asrMethod==2?1:0}`;
+          const resp = await fetch(url);
+          if(!resp.ok) throw new Error('AlAdhan fetch failed: ' + resp.status);
+          const data = await resp.json();
+          if(data.code !== 200) throw new Error('AlAdhan error: ' + (data.status || 'unknown'));
+          // Map fields to our set: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha
+          const t = data.data.timings;
+          return {
+            Fajr: t.Fajr.slice(0,5),
+            Sunrise: t.Sunrise.slice(0,5),
+            Dhuhr: t.Dhuhr.slice(0,5),
+            Asr: t.Asr.slice(0,5),
+            Maghrib: t.Maghrib.slice(0,5),
+            Isha: t.Isha.slice(0,5)
+          };
+        }catch(e){ throw e; }
+      }
+    };
+
+    /* ---------- ICS Export ---------- */
+    function makeICS(date, coords, times){
+      // date: Date; times: {Fajr:"05:12",...}
+      const lines = [];
+      function dtToICS(date, timeStr){
+        // date local + timeStr "HH:MM" -> UTC basic format YYYYMMDDTHHMM00Z
+        const [hh, mm] = timeStr.split(':').map(Number);
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hh, mm, 0);
+        return d.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+      }
+      const uid = 'prayer-' + Date.now() + '@pro-pray.local';
+      lines.push('BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ProPrayer//EN','CALSCALE:GREGORIAN');
+      for(const p of ['Fajr','Dhuhr','Asr','Maghrib','Isha']){
+        if(!times[p]) continue;
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:' + uid + '-' + p);
+        lines.push('SUMMARY:' + p + ' prayer');
+        lines.push('DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z');
+        lines.push('DTSTART:' + dtToICS(date, times[p]));
+        // default event 15 minutes
+        const [hh, mm] = times[p].split(':').map(Number);
+        const end = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hh, mm + 15);
+        lines.push('DTEND:' + end.toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z');
+        lines.push('END:VEVENT');
+      }
+      lines.push('END:VCALENDAR');
+      return lines.join('\r\n');
+    }
+
+    /* ---------- App state & UI ---------- */
+    const state = {
+      coords: null, // {lat, lon, timezone, name}
+      date: new Date(),
+      prefs: {
+        calcSource: localStorage.getItem('calcSource') || 'calc',
+        asrMethod: parseInt(localStorage.getItem('asrMethod') || '1', 10),
+        tzManual: localStorage.getItem('tzManual') || '', // optional manual timezone offset
+        useAlAdhan: localStorage.getItem('useAlAdhan') === 'true'
+      },
+      times: null,
+      alarms: JSON.parse(localStorage.getItem('prayerPrefs') || '{}'),
+      nextTimers: [] // references to setTimeout for scheduled notifications
+    };
+
+    // UI elements
+    const displayDate = $('#displayDate');
+    const displayHijri = $('#displayHijri');
+    const monthTitle = $('#monthTitle');
+    const subDate = $('#subDate');
+    const locLabel = $('#locLabel');
+    const prayersContainer = $('#prayersContainer');
+    const infoNote = $('#infoNote');
+
+    // update header dates
+    function updateDates(){
+      const d = state.date;
+      const opts = {weekday:'short', day:'2-digit', month:'long', year:'numeric'};
+      displayDate.textContent = d.toLocaleDateString(undefined, opts);
+      subDate.textContent = d.toLocaleDateString(undefined, opts);
+      const hij = gregToHijri(d);
+      displayHijri.textContent = `${hij.d} Jumādā al-.. • ${displayDate.textContent}`;
+      monthTitle.textContent = `${hij.d} Jumādā al-..`;
+    }
+
+    // render prayer list
+    function renderList(){
+      prayersContainer.innerHTML = '';
+      const order = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+      for(const p of order){
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.setAttribute('data-prayer', p);
+        row.innerHTML = `
+          <div class="left">
+            <div class="pray-name">${p}</div>
+            <div class="pray-time" id="time-${p}">--:--</div>
+          </div>
+          <div class="actions">
+            <button class="bell" data-prayer="${p}" aria-pressed="false" title="Toggle ${p} reminder">🔔</button>
+          </div>
+        `;
+        prayersContainer.appendChild(row);
+      }
+      // attach bell handlers, restore states
+      $$('.bell').forEach(b=>{
+        const pr = b.dataset.prayer;
+        if(state.alarms[pr]){ b.classList.add('active'); b.setAttribute('aria-pressed','true'); }
+        b.addEventListener('click', ()=>{
+          const active = b.classList.toggle('active');
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+          state.alarms[pr] = active;
+          localStorage.setItem('prayerPrefs', JSON.stringify(state.alarms));
+          if(active) scheduleNotificationForPrayer(pr);
+          else cancelNotificationForPrayer(pr);
+        });
+      });
+    }
+
+    // write times into UI
+    function displayTimes(times){
+      state.times = times;
+      for(const k in times){
+        const el = $(`#time-${k}`);
+        if(el) el.textContent = times[k];
+      }
+    }
+
+    // compute timezone offset to use
+    function getTimezoneOffsetHours(){
+      if(state.prefs.tzManual && state.prefs.tzManual.trim()!=='') {
+        const val = parseFloat(state.prefs.tzManual);
+        if(!isNaN(val)) return val;
+      }
+      return -(new Date()).getTimezoneOffset() / 60;
+    }
+
+    // compute times using either local calc or AlAdhan
+    async function computeTimesAndRender(){
+      updateDates();
+      // show placeholder
+      displayTimes({Fajr:'--:--', Sunrise:'--:--', Dhuhr:'--:--', Asr:'--:--', Maghrib:'--:--', Isha:'--:--'});
+      if(!state.coords){
+        locLabel.textContent = 'Location: unknown • Using approximate times (default city)';
+        // default to Dhaka if none (user from Bangladesh is likely)
+        state.coords = {lat:23.7, lon:90.4, timezone:getTimezoneOffsetHours(), name:'Dhaka (approx)'};
+      }
+      const coords = {lat: state.coords.lat, lon: state.coords.lon, timezone: getTimezoneOffsetHours()};
+      try {
+        let times;
+        if(state.prefs.calcSource === 'aladhan' || state.prefs.useAlAdhan){
+          infoNote.textContent = 'Fetching times from AlAdhan…';
+          times = await PrayerCalc.getTimesAlAdhan(state.date, coords, {asrMethod: state.prefs.asrMethod});
+          infoNote.textContent = 'Using AlAdhan API results.';
+        } else {
+          infoNote.textContent = 'Calculating times locally…';
+          times = PrayerCalc.getTimesLocal(state.date, coords, {fajrAngle:18, ishaAngle:18, asrMethod: state.prefs.asrMethod});
+          infoNote.textContent = 'Local calculation used. Switch to AlAdhan for higher fidelity.';
         }
-
-        function closeModal() {
-            document.getElementById('custom-modal').style.display = 'none';
+        displayTimes(times);
+        locLabel.textContent = `Location: ${state.coords.name || `${coords.lat.toFixed(3)}, ${coords.lon.toFixed(3)}`}`;
+        // schedule notifications for toggled alarms (clear old timers)
+        clearAllScheduled();
+        for(const p of Object.keys(state.alarms)){
+          if(state.alarms[p]) scheduleNotificationForPrayer(p);
         }
+      } catch(err){
+        console.error(err);
+        infoNote.textContent = 'Error calculating times: ' + (err.message || String(err));
+      }
+    }
 
-        // --- DATE & NAVIGATION FUNCTIONS ---
+    /* ---------- Geolocation & search ---------- */
+    async function enableGeolocation(){
+      if(!navigator.geolocation) { alert('Geolocation not supported'); return; }
+      $('#btnLocate').disabled = true; $('#btnLocate').textContent = 'Locating…';
+      navigator.geolocation.getCurrentPosition(async (pos)=>{
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        // best-effort reverse geocode
+        const name = await reverseGeocodeName(lat, lon);
+        state.coords = {lat, lon, name, timezone: getTimezoneOffsetHours()};
+        $('#btnLocate').textContent = 'Location enabled';
+        computeTimesAndRender();
+      }, (err)=>{
+        console.warn(err);
+        alert('Location denied or unavailable.');
+        $('#btnLocate').disabled = false; $('#btnLocate').textContent = 'Enable location';
+      }, {enableHighAccuracy:true, timeout:10000});
+    }
 
-        /**
-         * Formats a date object into a readable string.
-         * @param {Date} date - The date object.
-         * @returns {string} Formatted date string.
-         */
-        function formatGregorianDate(date) {
-            const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
+    async function reverseGeocodeName(lat, lon){
+      try{
+        const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+        if(!resp.ok) return null;
+        const data = await resp.json();
+        return data.address && (data.address.city || data.address.town || data.address.village || data.address.state) || data.display_name;
+      }catch(e){ return null; }
+    }
+
+    // manual search prompt using Nominatim
+    async function promptSearch(){
+      const q = prompt('Search for city or place (e.g., "Dhaka, Bangladesh")');
+      if(!q) return;
+      try{
+        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1`);
+        if(!resp.ok) throw new Error('Search failed');
+        const data = await resp.json();
+        if(!data || data.length===0) { alert('No results'); return; }
+        const first = data[0];
+        state.coords = {lat: parseFloat(first.lat), lon: parseFloat(first.lon), name: first.display_name, timezone: getTimezoneOffsetHours()};
+        computeTimesAndRender();
+      }catch(e){ alert('Search error: ' + e.message); }
+    }
+
+    /* ---------- Notifications scheduling (in-page) ---------- */
+    function scheduleNotificationForPrayer(prayerName){
+      // if no times yet, do nothing
+      if(!state.times || !state.times[prayerName]) return;
+      // Cancel existing for this prayer
+      cancelNotificationForPrayer(prayerName);
+      // compute ms until that time (local)
+      const timeStr = state.times[prayerName]; // "HH:MM"
+      const [hh, mm] = timeStr.split(':').map(Number);
+      const target = new Date(state.date.getFullYear(), state.date.getMonth(), state.date.getDate(), hh, mm, 0);
+      const now = new Date();
+      let diff = target - now;
+      if(diff < 0) {
+        // schedule for next day
+        diff += 24 * 3600 * 1000;
+      }
+      // schedule a gentle notification while tab open
+      const id = setTimeout(async ()=>{
+        // show a friendly in-page notification (and system notification if permitted)
+        showInPageNotification(`${prayerName} • ${timeStr}`, `It's time for ${prayerName} prayer.`);
+        if(Notification && Notification.permission === 'granted'){
+          new Notification(`${prayerName} — Prayer time`, {body: `It's ${timeStr} • ${prayerName}`, tag: 'prayer-'+prayerName});
         }
+      }, diff);
+      state.nextTimers.push({prayer:prayerName, id});
+    }
 
-        /**
-         * Simulates a Hijri date based on the Gregorian date.
-         * Note: Full Hijri conversion requires a complex library. This is for UI realism.
-         * @param {Date} date - The date object.
-         * @returns {string} Simulated Hijri display string.
-         */
-        function formatHijriDate(date) {
-            const day = date.getDate();
-            const hijriMonthNames = ["Muḥarram", "Ṣafar", "Rabīʿ al-Awwal", "Rabīʿ ath-Thānī", "Jumādā al-Ūlā", "Jumādā al-Ākhirah", "Rajab", "Shaʿbān", "Ramaḍān", "Shawwāl", "Dhū al-Qaʿdah", "Dhū al-Ḥijjah"];
-            const monthIndex = date.getMonth() % hijriMonthNames.length;
-            
-            return `${day}, ${hijriMonthNames[monthIndex].substring(0, 10)}..`;
-        }
+    function cancelNotificationForPrayer(prayerName){
+      const toRemove = state.nextTimers.filter(t => t.prayer === prayerName);
+      for(const t of toRemove) clearTimeout(t.id);
+      state.nextTimers = state.nextTimers.filter(t => t.prayer !== prayerName);
+    }
+    function clearAllScheduled(){ state.nextTimers.forEach(t=>clearTimeout(t.id)); state.nextTimers = []; }
 
-        /**
-         * Changes the displayed date and updates the UI.
-         * @param {number} days - Number of days to add/subtract.
-         */
-        function changeDate(days) {
-            currentDate.setDate(currentDate.getDate() + days);
-            updateUI();
-            
-            // Re-fetch/re-calculate times if location is known
-            if (locationData) {
-                // This is where you would call your API to get times for the new date
-                renderPrayerTimes(locationData, "Times updated for selected date.");
-            }
-        }
-        
-        /**
-         * Resets the displayed date to today.
-         */
-        function resetDate() {
-            currentDate = new Date();
-            updateUI();
-            if (locationData) {
-                renderPrayerTimes(locationData, "Times reset to current date.");
-            }
-        }
+    function showInPageNotification(title, message){
+      // small top floating alert
+      const el = document.createElement('div');
+      el.style.position='fixed'; el.style.left='50%'; el.style.top='22px'; el.style.transform='translateX(-50%)';
+      el.style.background='linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))';
+      el.style.padding='12px 18px'; el.style.borderRadius='12px'; el.style.boxShadow='0 8px 30px rgba(8,20,12,0.12)';
+      el.style.zIndex=9999; el.style.fontWeight=700;
+      el.textContent = `${title} — ${message}`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.style.transition='opacity .5s', 20);
+      setTimeout(()=>el.style.opacity='0', 4600);
+      setTimeout(()=>el.remove(), 5200);
+    }
 
+    /* ---------- ICS export handler ---------- */
+    function exportICS(){
+      if(!state.times) { alert('No times available'); return; }
+      const ics = makeICS(state.date, state.coords || {}, state.times);
+      const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prayer-times-${isoDateLocal(state.date)}.ics`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
 
-        // --- LOCATION & DATA FETCHING FUNCTIONS ---
+    /* ---------- Navigation handlers ---------- */
+    function prevDay(){
+      state.date.setDate(state.date.getDate() - 1);
+      computeTimesAndRender();
+    }
+    function nextDay(){
+      state.date.setDate(state.date.getDate() + 1);
+      computeTimesAndRender();
+    }
 
-        /**
-         * Requests location permission from the user.
-         */
-        function requestLocation() {
-            if (navigator.geolocation) {
-                document.getElementById('loading-state').innerHTML = `<svg class="animate-spin h-8 w-8 text-primary-dark mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Fetching precise coordinates...`;
-                document.getElementById('location-banner').classList.add('opacity-50', 'pointer-events-none');
-                
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        
-                        // Store location data globally
-                        locationData = { lat, lon };
+    /* ---------- Modal (settings) ---------- */
+    const modalBackdrop = $('#modalBackdrop');
+    function openModal(){
+      $('#calcSource').value = state.prefs.calcSource;
+      $('#asrMethod').value = String(state.prefs.asrMethod);
+      $('#tzInput').value = state.prefs.tzManual || '';
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.setAttribute('aria-hidden','false');
+    }
+    function closeModal(){
+      modalBackdrop.style.display = 'none';
+      modalBackdrop.setAttribute('aria-hidden','true');
+    }
+    function saveSettings(){
+      state.prefs.calcSource = $('#calcSource').value;
+      state.prefs.asrMethod = parseInt($('#asrMethod').value,10);
+      state.prefs.tzManual = $('#tzInput').value.trim();
+      localStorage.setItem('calcSource', state.prefs.calcSource);
+      localStorage.setItem('asrMethod', String(state.prefs.asrMethod));
+      localStorage.setItem('tzManual', state.prefs.tzManual || '');
+      // if calcSource is aladhan, set useAlAdhan toggle for UI convenience
+      state.prefs.useAlAdhan = state.prefs.calcSource === 'aladhan';
+      localStorage.setItem('useAlAdhan', state.prefs.useAlAdhan ? 'true' : 'false');
+      closeModal();
+      computeTimesAndRender();
+    }
 
-                        // Hide the banner on success
-                        document.getElementById('location-banner').style.display = 'none';
+    /* ---------- Quick AlAdhan fetch button ---------- */
+    $('#fetchAlAdhan').addEventListener('click', async ()=>{
+      state.prefs.calcSource = 'aladhan';
+      state.prefs.useAlAdhan = true;
+      localStorage.setItem('calcSource','aladhan');
+      localStorage.setItem('useAlAdhan','true');
+      computeTimesAndRender();
+    });
 
-                        // Show Success Message
-                        showModal('Success', `GPS coordinates acquired! Latitude: ${lat.toFixed(4)}, Longitude: ${lon.toFixed(4)}. Displaying accurate worldwide prayer times.`, 'success');
+    /* ---------- Bind UI controls ---------- */
+    $('#btnLocate').addEventListener('click', enableGeolocation);
+    $('#btnSearch').addEventListener('click', promptSearch);
+    $('#btnExport').addEventListener('click', exportICS);
+    $('#prevDay').addEventListener('click', prevDay);
+    $('#nextDay').addEventListener('click', nextDay);
 
-                        // Proceed to render times
-                        renderPrayerTimes(locationData, `Times calculated for GPS Location (${lat.toFixed(2)}, ${lon.toFixed(2)})`);
-                    },
-                    (error) => {
-                        document.getElementById('location-banner').classList.remove('opacity-50', 'pointer-events-none');
-                        document.getElementById('loading-state').innerHTML = `<svg class="h-8 w-8 text-accent-red mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Location access failed. Please try again.`;
+    $('#btnSettings').addEventListener('click', openModal);
+    $('#openSettings').addEventListener('click', openModal);
+    $('#closeModal').addEventListener('click', closeModal);
+    $('#saveSettings').addEventListener('click', saveSettings);
 
-                        let errorMessage = 'Location access failed. Please ensure permissions are granted.';
-                        if (error.code === error.PERMISSION_DENIED) {
-                            errorMessage = 'Location permission denied by user. Please enable location services in your browser settings.';
-                        }
-                        showModal('GPS Error', errorMessage, 'error');
-                    },
-                    { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
-                );
-            } else {
-                showModal("Browser Error", "Geolocation is not supported by your browser. Accurate location service is unavailable.", 'error');
-            }
-        }
+    // close modal on backdrop click
+    modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeModal(); });
 
-        /**
-         * Renders the prayer times list after a successful location fetch.
-         * @param {Object} data - Location data (lat, lon).
-         * @param {string} locationMsg - Message to display at the bottom.
-         */
-        function renderPrayerTimes(data, locationMsg) {
-            const listContainer = document.getElementById('prayer-list');
-            listContainer.classList.remove('hidden');
-            document.getElementById('loading-state').style.display = 'none';
+    // Allow notification permission request
+    function ensureNotificationPermission(){
+      if(!('Notification' in window)) return;
+      if(Notification.permission === 'default'){
+        // we ask permission only when user toggles an alarm — here we do a gentle prompt
+        // But to make demo convenient, ask once when they open settings
+        Notification.requestPermission().then(permission => {
+          console.log('Notification permission:', permission);
+        });
+      }
+    }
+    $('#openSettings').addEventListener('click', ensureNotificationPermission);
 
-            let html = '';
-            
-            // In a real app, this simulation would be replaced by actual data from a time calculation API.
-            const nextPrayerIndex = 2; // Simulating Dhuhr as the next prayer for demonstration
+    /* ---------- init ---------- */
+    (function init(){
+      // Render empty list & load saved alarm toggles
+      renderList();
+      updateDates();
+      // Load saved prefs already in state
+      // Initial compute
+      computeTimesAndRender();
+      // Refresh at midnight
+      (function scheduleMidnightRefresh(){
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5);
+        const ms = midnight - now;
+        setTimeout(()=>{
+          state.date = new Date();
+          computeTimesAndRender();
+          scheduleMidnightRefresh();
+        }, ms);
+      })();
+      // small accessibility: keyboard shortcut "s" opens settings
+      window.addEventListener('keydown', (e)=>{ if(e.key === 's' || e.key === 'S') openModal(); });
+    })();
 
-            PRAYER_TIMES.forEach((item, index) => {
-                const isActive = index === nextPrayerIndex && locationData;
-                const activeClasses = isActive ? 'active' : '';
-                
-                html += `
-                    <div class="timeline-item flex justify-between items-center py-2 ${activeClasses}">
-                        <div class="timeline-dot"></div>
-                        <div class="flex-grow">
-                            <p class="text-lg font-semibold text-gray-800">${item.name} ${isActive ? '<span class="text-xs text-accent-emerald font-bold ml-1">(Next)</span>' : ''}</p>
-                            <p class="text-3xl font-extrabold prayer-time text-gray-700">${item.time}</p>
-                        </div>
-                        ${item.isPrayer ? `
-                            <button class="bell-btn p-2 text-gray-400 hover:text-accent-emerald transition ${isActive ? 'active' : ''}" aria-label="Set notification for ${item.name}">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                </svg>
-                            </button>
-                        ` : '<span class="w-7 h-7 block"></span>'}
-                    </div>
-                `;
-            });
-
-            listContainer.innerHTML = html;
-            document.getElementById('location-display').innerHTML = `
-                <p class="font-bold text-primary-dark">${locationMsg}</p>
-                <p>Calculation Method: High-Latitude Adjustment (Simulated)</p>
-                <p>Date: ${formatGregorianDate(currentDate)}</p>
-            `;
-        }
-        
-        // --- INITIALIZATION ---
-
-        function updateUI() {
-            const gregorianNav = formatGregorianDate(currentDate);
-            document.getElementById('current-gregorian-date').textContent = gregorianNav;
-            document.getElementById('gregorian-nav-display').textContent = gregorianNav;
-            document.getElementById('hijri-display').textContent = formatHijriDate(currentDate);
-        }
-
-        window.onload = function() {
-            updateUI();
-            console.log("Dashboard initialized. Click 'Enable GPS' to activate the location service.");
-        }
-
-    </script>
+  })();
+  </script>
 </body>
 </html>
-
